@@ -124,13 +124,13 @@ class OriginalTplinkDeviceScanner(TplinkDeviceScanner):
         referer = 'http://{}'.format(self.host)
         page = requests.get(
             url, auth=(self.username, self.password),
-            headers={REFERER: referer}, timeout=4)
+            headers={'Referer': referer}, timeout=4)
         
         # Check 5Ghz band (if available)
         url = 'http://{}/userRpm/WlanStationRpm_5g.htm'.format(self.host)
         page2 = requests.get(
             url, auth=(self.username, self.password),
-            headers={REFERER: referer}, timeout=4)
+            headers={'Referer': referer}, timeout=4)
 
         result = self.parse_macs_hyphens.findall(page.text + ' ' + page2.text)
 
@@ -162,7 +162,7 @@ class N600TplinkDeviceScanner(TplinkDeviceScanner):
             # Refresh associated clients.
             page = requests.post(
                 'http://{}/cgi?7'.format(self.host),
-                headers={REFERER: referer, COOKIE: cookie},
+                headers={'Referer': referer, 'Cookie': cookie},
                 data=(
                     '[ACT_WLAN_UPDATE_ASSOC#1,{},0,0,0,0#0,0,0,0,0,0]0,0\r\n'
                     ).format(clients_frequency),
@@ -174,7 +174,7 @@ class N600TplinkDeviceScanner(TplinkDeviceScanner):
             # Retrieve associated clients.
             page = requests.post(
                 'http://{}/cgi?6'.format(self.host),
-                headers={REFERER: referer, COOKIE: cookie},
+                headers={'Referer': referer, 'Cookie': cookie},
                 data=(
                     '[LAN_WLAN_ASSOC_DEV#0,0,0,0,0,0#1,{},0,0,0,0]0,1\r\n'
                     'AssociatedDeviceMACAddress\r\n'
@@ -221,7 +221,7 @@ class OldC9TplinkDeviceScanner(TplinkDeviceScanner):
         cookie = self.get_base64_cookie_string()
 
         response = requests.post(
-            url, headers={REFERER: referer, COOKIE: cookie},
+            url, headers={'Referer': referer, 'Cookie': cookie},
             timeout=4)
 
         try:
@@ -274,7 +274,7 @@ class C9TplinkDeviceScanner(TplinkDeviceScanner):
         response = requests.post(
             url, params={'operation': 'login', 'username': self.username,
                          'password': self.password},
-            headers={REFERER: referer}, timeout=4)
+            headers={'Referer': referer}, timeout=4)
 
         try:
             self.stok = response.json().get('data').get('stok')
@@ -303,7 +303,7 @@ class C9TplinkDeviceScanner(TplinkDeviceScanner):
         referer = 'http://{}/webpages/index.html'.format(self.host)
 
         response = requests.post(
-            url, params={'operation': 'load'}, headers={REFERER: referer},
+            url, params={'operation': 'load'}, headers={'Referer': referer},
             cookies={'sysauth': self.sysauth}, timeout=5)
 
         try:
@@ -342,7 +342,7 @@ class C9TplinkDeviceScanner(TplinkDeviceScanner):
         referer = 'http://{}/webpages/index.html'.format(self.host)
 
         requests.post(
-            url, params={'operation': 'write'}, headers={REFERER: referer},
+            url, params={'operation': 'write'}, headers={'Referer': referer},
             cookies={'sysauth': self.sysauth})
         self.stok = ''
         self.sysauth = ''
@@ -374,7 +374,7 @@ class C7TplinkDeviceScanner(TplinkDeviceScanner):
         # Create the authorization cookie.
         cookie = 'Authorization=Basic {}'.format(self.credentials)
 
-        response = requests.get(url, headers={COOKIE: cookie})
+        response = requests.get(url, headers={'Cookie': cookie})
 
         try:
             result = re.search(r'window.parent.location.href = '
@@ -407,8 +407,8 @@ class C7TplinkDeviceScanner(TplinkDeviceScanner):
             cookie = 'Authorization=Basic {}'.format(self.credentials)
 
             page = requests.get(url, headers={
-                COOKIE: cookie,
-                REFERER: referer,
+                'Cookie': cookie,
+                'Referer': referer,
             })
             mac_results.extend(self.parse_macs_hyphens.findall(page.text))
 
@@ -436,18 +436,16 @@ class EAP225TplinkDeviceScanner(TplinkDeviceScanner):
         base_url = 'http://{}'.format(self.host)
 
         header = {
-            USER_AGENT:
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12;"
-                " rv:53.0) Gecko/20100101 Firefox/53.0",
-            ACCEPT: "application/json, text/javascript, */*; q=0.01",
-            ACCEPT_LANGUAGE: "Accept-Language: en-US,en;q=0.5",
-            ACCEPT_ENCODING: "gzip, deflate",
-            CONTENT_TYPE: "application/x-www-form-urlencoded; charset=UTF-8",
-            HTTP_HEADER_X_REQUESTED_WITH: "XMLHttpRequest",
-            REFERER: "http://{}/".format(self.host),
-            CONNECTION: KEEP_ALIVE,
-            PRAGMA: HTTP_HEADER_NO_CACHE,
-            CACHE_CONTROL: HTTP_HEADER_NO_CACHE,
+             "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12;  rv:53.0) Gecko/20100101 Firefox/53.0",
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Accept-Language": "Accept-Language: en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "HTTP-Header-X-Requested-Width": "XMLHttpRequest",
+            "Reffer": "http://{}/".format(self.host),
+            "Connection": "Keep-Alive",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "HTTP-Header-No-Chache",
         }
 
         password_md5 = hashlib.md5(
@@ -546,7 +544,7 @@ class VR600TplinkDeviceScanner(TplinkDeviceScanner):
 
         randomSessionNum = self._get_random_alphaNumeric_string(15)
 
-        headers= { REFERER: referer }
+        headers= { 'Referer': referer }
 
         response = requests.post(url, headers=headers)
 
@@ -566,8 +564,8 @@ class VR600TplinkDeviceScanner(TplinkDeviceScanner):
         referer = 'http://{}'.format(self.host)
 
         headers= {
-            REFERER: referer,
-            COOKIE: 'loginErrorShow=1; JSESSIONID='+self.jsessionId,
+            'Referer': referer,
+            'Cookie': 'loginErrorShow=1; JSESSIONID='+self.jsessionId,
             }
 
         cookies = {'JSESSIONID': self.jsessionId}
@@ -607,8 +605,8 @@ class VR600TplinkDeviceScanner(TplinkDeviceScanner):
         referer = 'http://{}'.format(self.host)
         headers= {
             'TokenID': self.token,
-            REFERER: referer,
-            COOKIE: 'JSESSIONID=' + self.jsessionId
+            'Referer': referer,
+            'Cookie': 'JSESSIONID=' + self.jsessionId
             }
 
         mac_results = []
@@ -734,7 +732,7 @@ class C6TplinkDeviceScanner(TplinkDeviceScanner):
             # If possible implement RSA encryption of password here.
             response = requests.post(
             url, params={'operation': 'read'},
-            headers={REFERER: referer}, timeout=4)
+            headers={'Referer': referer}, timeout=4)
 
             jsonData = response.json()
 
@@ -753,7 +751,7 @@ class C6TplinkDeviceScanner(TplinkDeviceScanner):
             # If possible implement RSA encryption of password here.
             response = requests.post(
             url, params={'operation': 'read'},
-            headers={REFERER: referer}, timeout=4)
+            headers={'Referer': referer}, timeout=4)
 
             jsonData = response.json()
 
@@ -776,7 +774,7 @@ class C6TplinkDeviceScanner(TplinkDeviceScanner):
 
         response = requests.post(
             url, data=body,
-            headers={REFERER: referer, 'Content-Type': 'application/x-www-form-urlencoded'}, timeout=4)
+            headers={'Referer': referer, 'Content-Type': 'application/x-www-form-urlencoded'}, timeout=4)
 
         try:
             jsonData = response.json()
@@ -816,7 +814,7 @@ class C6TplinkDeviceScanner(TplinkDeviceScanner):
         referer = 'http://{}/webpages/index.html'.format(self.host)
 
         response = requests.post(
-            url, params={'operation': 'load'}, headers={REFERER: referer},
+            url, params={'operation': 'load'}, headers={'Referer': referer},
             cookies={'sysauth': self.sysauth}, timeout=5)
 
         try:
@@ -863,7 +861,7 @@ class C6TplinkDeviceScanner(TplinkDeviceScanner):
 
         body = self.prepare_data('operation=write')
         response = requests.post(
-            url, data=body, headers={REFERER: referer, 'Content-Type': 'application/x-www-form-urlencoded'},
+            url, data=body, headers={'Referer': referer, 'Content-Type': 'application/x-www-form-urlencoded'},
             cookies={'sysauth': self.sysauth})
 
         self.stok = ''
